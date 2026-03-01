@@ -166,4 +166,4 @@ cython_debug/
 *.pickle
 
 # project environment
-env_recsys_start/
+env_recsys_start/catboost_info/

@@ -1,72 +1,95 @@
-# Подготовка виртуальной машины
+# Рекомендательная система для Яндекс Музыки
 
-## Склонируйте репозиторий
+## Описание
 
-Склонируйте репозиторий проекта:
+Прототип персональной рекомендательной системы для музыкального стримингового сервиса. Система использует данные о прослушиваниях ~1.4M пользователей и 1M треков для генерации рекомендаций трёх типов:
 
+- **Топ популярных** — базовый baseline
+- **Персональные ALS** — collaborative filtering (implicit)
+- **Итоговые** — с ранжирующей моделью CatBoost (3 признака)
+
+Дополнительно рассчитаны похожие треки (i2i) для онлайн-рекомендаций.
+
+## Подготовка виртуальной машины
+
+### Склонируйте репозиторий
+
+```bash
+git clone git@github.com:IvanAndreevichPle/mle-project-sprint-4-001.git
+cd mle-project-sprint-4-001
 ```
-git clone https://github.com/yandex-praktikum/mle-project-sprint-4-v001.git
-```
 
-## Активируйте виртуальное окружение
+### Активируйте виртуальное окружение
 
-Используйте то же самое виртуальное окружение, что и созданное для работы с уроками. Если его не существует, то его следует создать.
-
-Создать новое виртуальное окружение можно командой:
-
-```
+```bash
 python3 -m venv env_recsys_start
-```
-
-После его инициализации следующей командой
-
-```
 . env_recsys_start/bin/activate
-```
-
-установите в него необходимые Python-пакеты следующей командой
-
-```
 pip install -r requirements.txt
 ```
 
 ### Скачайте файлы с данными
 
-Для начала работы понадобится три файла с данными:
-- [tracks.parquet](https://storage.yandexcloud.net/mle-data/ym/tracks.parquet)
-- [catalog_names.parquet](https://storage.yandexcloud.net/mle-data/ym/catalog_names.parquet)
-- [interactions.parquet](https://storage.yandexcloud.net/mle-data/ym/interactions.parquet)
- 
-Скачайте их в директорию локального репозитория. Для удобства вы можете воспользоваться командой wget:
-
-```
+```bash
 wget https://storage.yandexcloud.net/mle-data/ym/tracks.parquet
-
 wget https://storage.yandexcloud.net/mle-data/ym/catalog_names.parquet
-
 wget https://storage.yandexcloud.net/mle-data/ym/interactions.parquet
 ```
 
-## Запустите Jupyter Lab
+## Расчёт рекомендаций
 
-Запустите Jupyter Lab в командной строке
+Код для выполнения первой части проекта находится в файле `recommendations.ipynb`. Для запуска:
 
-```
+```bash
 jupyter lab --ip=0.0.0.0 --no-browser
 ```
 
-# Расчёт рекомендаций
+Откройте ноутбук и выполните все ячейки последовательно. Результаты (parquet-файлы) автоматически сохраняются в S3-бакет.
 
-Код для выполнения первой части проекта находится в файле `recommendations.ipynb`. Изначально, это шаблон. Используйте его для выполнения первой части проекта.
-
-# Сервис рекомендаций
+## Сервис рекомендаций
 
 Код сервиса рекомендаций находится в файле `recommendations_service.py`.
 
-<*укажите здесь необходимые шаги для запуска сервиса рекомендаций*>
+### Запуск сервиса
 
-# Инструкции для тестирования сервиса
+```bash
+python recommendations_service.py
+```
+
+Сервис запустится на `http://localhost:8000`.
+
+### API endpoints
+
+- `GET /` — информация о сервисе
+- `GET /recommendations/{user_id}?k=10` — персональные рекомендации (fallback на топ популярных)
+- `GET /similar/{track_id}?k=10` — похожие треки
+
+### Примеры запросов
+
+```bash
+curl http://localhost:8000/
+curl http://localhost:8000/recommendations/42
+curl http://localhost:8000/similar/53404
+```
+
+## Инструкции для тестирования сервиса
 
 Код для тестирования сервиса находится в файле `test_service.py`.
 
-<*укажите здесь необходимые шаги для тестирования сервиса рекомендаций*>
+```bash
+# Сначала запустите сервис (в отдельном терминале)
+python recommendations_service.py
+
+# Затем запустите тесты
+python test_service.py
+```
+
+## Структура проекта
+
+```
+├── recommendations.ipynb          # Ноутбук: этапы 1-3
+├── recommendations_service.py     # Сервис рекомендаций (этап 4)
+├── test_service.py                # Тесты сервиса
+├── requirements.txt               # Зависимости
+├── .gitignore                     # Исключения для git
+└── README.md                      # Документация
+```
