@@ -165,5 +165,11 @@ cython_debug/
 *.parquet
 *.pickle
 
+# catboost artifacts
+catboost_info/
+
 # project environment
-env_recsys_start/catboost_info/
+env_recsys_start/
+
+# keep test service log
+!test_service.log
